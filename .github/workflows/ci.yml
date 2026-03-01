@@ -21,21 +21,33 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: 'maven' # Cache automático de .m2
+          cache: maven
 
       # Paso 3: Compilar y empaquetar
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      # Paso 4: Ejecutar todas las pruebas
+      # Paso 4: Ejecutar pruebas
       - name: Run Tests
         run: mvn test
 
       # Paso 5: Guardar reportes de pruebas
       - name: Upload Surefire Reports
         uses: actions/upload-artifact@v4
-        if: always() # Ejecutar incluso si las pruebas fallan
+        if: always()
         with:
           name: test-reports
           path: target/surefire-reports/
+          retention-days: 7
+
+      # Paso 6: Ejecutar verify para cobertura (JaCoCo)
+      - name: Run Tests with Coverage
+        run: mvn verify
+
+      # Paso 7: Subir reporte de cobertura
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: target/site/jacoco/
           retention-days: 7
